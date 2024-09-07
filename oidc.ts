@@ -23,7 +23,7 @@ const keycloakIssuer = await Issuer.discover(issuerUrl)
 // Note: for the userInfo method, client_secret is not needed
 export const client = new keycloakIssuer.Client({
   client_id: KEYCLOAK_CLIENT_ID,
-  // client_secret: KEYCLOAK_CLIENT_SECRET,
+  client_secret: KEYCLOAK_CLIENT_SECRET, // Necessary for introspect
 })
 
 export const introspectMiddleware = async (
@@ -32,8 +32,14 @@ export const introspectMiddleware = async (
   next: NextFunction
 ) => {
   const token = req.headers.authorization?.split(" ")[1]
-  const verified = await client.introspect(token as string)
-  console.log({ verified })
+  if (!token || token === "undefined")
+    return res.status(401).send("Missing token")
+
+  console.log(token)
+  const introspection = await client.introspect(token)
+  // NOTE: Introspection works even if token is "undefined", resulting in {active: false}
+  console.log(introspection)
+  if (!introspection.active) return res.status(401).send("Not active")
   next()
 }
 
@@ -43,8 +49,11 @@ export const userInfoMiddleware = async (
   next: NextFunction
 ) => {
   const token = req.headers.authorization?.split(" ")[1]
-  const userInfo = await client.userinfo(token as string)
-  console.log({ userInfo })
+  if (!token || token === "undefined")
+    return res.status(401).send("Missing token")
+
+  const userInfo = await client.userinfo(token)
+  console.log(userInfo)
   next()
 }
 
