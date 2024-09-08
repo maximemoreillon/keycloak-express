@@ -21,6 +21,7 @@ const keycloakIssuer = await Issuer.discover(issuerUrl)
   for a basic client definition, but you may provide any IANA registered client metadata.
 */
 // Note: for the userInfo method, client_secret is not needed
+// This probably implies that the token is not verified
 export const client = new keycloakIssuer.Client({
   client_id: KEYCLOAK_CLIENT_ID,
   client_secret: KEYCLOAK_CLIENT_SECRET, // Necessary for introspect
@@ -35,11 +36,11 @@ export const introspectMiddleware = async (
   if (!token || token === "undefined")
     return res.status(401).send("Missing token")
 
-  console.log(token)
   const introspection = await client.introspect(token)
   // NOTE: Introspection works even if token is "undefined", resulting in {active: false}
-  console.log(introspection)
   if (!introspection.active) return res.status(401).send("Not active")
+
+  res.locals.user = introspection
   next()
 }
 
@@ -53,7 +54,7 @@ export const userInfoMiddleware = async (
     return res.status(401).send("Missing token")
 
   const userInfo = await client.userinfo(token)
-  console.log(userInfo)
+  res.locals.user = userInfo
   next()
 }
 

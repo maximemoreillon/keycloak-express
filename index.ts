@@ -7,8 +7,8 @@ const app = express()
 
 app.use(cors())
 
-app.use(introspectMiddleware)
-// app.use(userInfoMiddleware)
+// app.use(introspectMiddleware)
+app.use(userInfoMiddleware)
 
 const handler = (req: Request, res: Response) => {
   console.log("GET /data")
