@@ -2,14 +2,12 @@ import { type NextFunction, type Request, type Response } from "express"
 import { Issuer, Strategy } from "openid-client"
 
 const {
-  KEYCLOAK_SERVER_URL = "http://localhost:8080",
-  KEYCLOAK_REALM = "master",
+  KEYCLOAK_ISSUER_URL = "http://localhost:8080/realms/master",
   KEYCLOAK_CLIENT_SECRET = "",
   KEYCLOAK_CLIENT_ID = "",
 } = process.env
 
-const issuerUrl = `${KEYCLOAK_SERVER_URL}/realms/${KEYCLOAK_REALM}`
-const keycloakIssuer = await Issuer.discover(issuerUrl)
+const keycloakIssuer = await Issuer.discover(KEYCLOAK_ISSUER_URL)
 
 // https://www.npmjs.com/package/openid-client/v/2.4.3#manually-recommended
 /* 
@@ -36,12 +34,17 @@ export const introspectMiddleware = async (
   if (!token || token === "undefined")
     return res.status(401).send("Missing token")
 
-  const introspection = await client.introspect(token)
-  // NOTE: Introspection works even if token is "undefined", resulting in {active: false}
-  if (!introspection.active) return res.status(401).send("Not active")
+  try {
+    const introspection = await client.introspect(token)
+    // NOTE: Introspection works even if token is "undefined", resulting in {active: false}
+    if (!introspection.active) return res.status(401).send("Not active")
 
-  res.locals.user = introspection
-  next()
+    res.locals.user = introspection
+    next()
+  } catch (error) {
+    console.error(error)
+    res.status(401).send(error)
+  }
 }
 
 export const userInfoMiddleware = async (
@@ -53,9 +56,17 @@ export const userInfoMiddleware = async (
   if (!token || token === "undefined")
     return res.status(401).send("Missing token")
 
-  const userInfo = await client.userinfo(token)
-  res.locals.user = userInfo
-  next()
+  console.log(token)
+
+  try {
+    const userInfo = await client.userinfo(token)
+    res.locals.user = userInfo
+    next()
+  } catch (error) {
+    console.error(error)
+
+    res.status(401).send(error)
+  }
 }
 
 // Passport (haven't managed to make it work yet)

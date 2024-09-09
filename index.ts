@@ -12,6 +12,7 @@ app.use(userInfoMiddleware)
 
 const handler = (req: Request, res: Response) => {
   console.log("GET /data")
+  console.log(res.locals.user)
   res.send("Data")
 }
 app.get("/data", handler)
