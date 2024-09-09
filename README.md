@@ -1,21 +1,4 @@
-# keycloak-express
+# Keycloak + Express
 
-## Dev
-
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.17. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
-
-## References
-
-- https://www.npmjs.com/package/openid-client
+This is sample code to demonstrate how to authenticate an Express API with Keycloak.
+Normally, the keycloak-connect could be used but as it is now deprecated, this sample also includes a method using the openid-client module.
