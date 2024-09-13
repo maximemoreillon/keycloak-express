@@ -1,31 +1,28 @@
+import dotenv from "dotenv"
+dotenv.config()
+
 import express, { type Request, type Response } from "express"
 import cors from "cors"
 // import { middleware as keycloakConnectMiddleware } from "./keycloak"
-import {
-  introspectMiddleware,
-  userInfoMiddleware,
-} from "@moreillon/express-oidc"
+import passportMiddleware from "./passport-jwt"
 
-const { KEYCLOAK_ISSUER_URL, KEYCLOAK_CLIENT_SECRET, KEYCLOAK_CLIENT_ID } =
-  process.env
+const {
+  KEYCLOAK_ISSUER_URL = "",
+  KEYCLOAK_CLIENT_SECRET,
+  KEYCLOAK_CLIENT_ID,
+  KEYCLOAK_JWKS_URI = "",
+} = process.env
 
 const app = express()
 
 app.use(cors())
 
-// app.use(introspectMiddleware)
-app.use(
-  userInfoMiddleware({
-    issuer_url: KEYCLOAK_ISSUER_URL,
-    client_id: KEYCLOAK_CLIENT_ID,
-    client_secret: KEYCLOAK_CLIENT_SECRET,
-  })
-)
+app.use(passportMiddleware({ jwksUri: KEYCLOAK_JWKS_URI }))
 
 const handler = (req: Request, res: Response) => {
   console.log("GET /data")
   console.log(res.locals.user)
-  res.send("Data")
+  res.send("This is the data from the server")
 }
 app.get("/data", handler)
 
