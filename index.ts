@@ -3,15 +3,9 @@ dotenv.config()
 
 import express, { type Request, type Response } from "express"
 import cors from "cors"
-// import { middleware as keycloakConnectMiddleware } from "./keycloak"
-import passportMiddleware from "./passport-jwt"
+import passportMiddleware from "@moreillon/express-oidc"
 
-const {
-  KEYCLOAK_ISSUER_URL = "",
-  KEYCLOAK_CLIENT_SECRET,
-  KEYCLOAK_CLIENT_ID,
-  KEYCLOAK_JWKS_URI = "",
-} = process.env
+const { KEYCLOAK_JWKS_URI = "" } = process.env
 
 const app = express()
 
