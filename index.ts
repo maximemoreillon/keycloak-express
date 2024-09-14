@@ -15,7 +15,7 @@ app.use(passportMiddleware({ jwksUri: KEYCLOAK_JWKS_URI }))
 
 const handler = (req: Request, res: Response) => {
   console.log("GET /data")
-  console.log(res.locals.user)
+  console.log(req.user)
   res.send("This is the data from the server")
 }
 app.get("/data", handler)
